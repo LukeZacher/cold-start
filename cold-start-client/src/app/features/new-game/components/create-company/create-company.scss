@@ -1,0 +1,61 @@
+.field__label,
+.country-label {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.field__input {
+  font-size: var(--text-lg);
+}
+
+.country-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  .country-card {
+    position: relative;
+    padding: var(--space-6) var(--space-8);
+    background: linear-gradient(135deg, var(--primary-color) 60%, var(--secondary-color) 60%);
+    border-radius: var(--radius-lg);
+    border: 1px solid transparent;
+    transition:
+      border-color var(--transition-base),
+      color var(--transition-base);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: var(--radius-lg);
+      transition: opacity var(--transition-base);
+    }
+
+    &--selected {
+      border-color: var(--color-primary-dark);
+
+      &::after {
+        opacity: 0;
+      }
+
+      .country-card__description {
+        color: var(--color-text-primary);
+      }
+    }
+
+    &__body {
+      position: relative;
+      z-index: 1;
+    }
+
+    &__name {
+      margin-bottom: var(--space-2);
+      font-size: var(--text-lg);
+    }
+
+    &__description {
+      transition: color var(--transition-base);
+    }
+  }
+}

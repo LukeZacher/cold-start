@@ -1,0 +1,66 @@
+<div class="step-form">
+  <div class="step-form__header">
+    <h2 class="step-form__title">Found Your Car Company</h2>
+    <p class="step-form__subtitle">
+      Every great automaker starts with a name. This is the parent company that will own your brands
+      -- think Stellantis, Toyota Motor Corporation, or Ford Motor Company.
+    </p>
+  </div>
+  <div class="step-form__body">
+    <form [formGroup]="createCompanyForm">
+      <div class="field">
+        <label class="field__label" for="company-name">Company Name</label>
+        <input
+          class="field__input"
+          id="company-name"
+          type="text"
+          placeholder="e.g. Apex Motor Group"
+          formControlName="name"
+          maxlength="50"
+        />
+        <p class="field__error">
+          @if (nameControl?.invalid && nameControl?.touched) {
+            @if (nameControl?.errors?.['required']) {
+              Company name is required.
+            }
+            @if (nameControl?.errors?.['minlength']) {
+              Company name must be at least {{ minCharsCompanyName }} characters.
+            }
+            @if (nameControl?.errors?.['maxlength']) {
+              Company name must be {{ maxCharsCompanyName }} characters or less.
+            }
+            @if (nameControl?.errors?.['pattern']) {
+              Company name can only contain letters, numbers, and spaces.
+            }
+          }
+        </p>
+      </div>
+      <div class="field">
+        <h3 class="country-label">Country</h3>
+        <div class="country-grid">
+          @for (country of countries(); track country.id) {
+            <label
+              class="country-card card-clickable"
+              [style.--primary-color]="country.primaryColor"
+              [style.--secondary-color]="country.secondaryColor"
+              [class.country-card--selected]="countryControl?.value === country.id"
+            >
+              <input type="radio" [value]="country.id" formControlName="countryId" hidden />
+              <div class="country-card__body">
+                <h4 class="country-card__name">{{ country.name }}</h4>
+                <p class="country-card__description">{{ country.description }}</p>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+      <button
+        class="btn btn--primary"
+        (click)="submit()"
+        [disabled]="createCompanyForm.invalid || submitting()"
+      >
+        {{ submitting() ? 'Creating...' : 'Create' }}
+      </button>
+    </form>
+  </div>
+</div>

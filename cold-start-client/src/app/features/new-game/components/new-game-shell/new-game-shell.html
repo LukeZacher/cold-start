@@ -1,0 +1,36 @@
+<div class="shell container">
+  <header class="shell__header">
+    <h1 class="shell__title">New Game</h1>
+    <nav class="shell__progress">
+      @for (step of steps; track step.number) {
+        <div
+          class="progress-step"
+          [class.progress-step--active]="newGameService.state().step === step.number"
+          [class.progress-step--complete]="newGameService.state().step > step.number"
+        >
+          <span class="progress-step__number">{{ step.number }}</span>
+          <span class="progress-step__label">{{ step.label }}</span>
+        </div>
+        @if (!$last) {
+          <div
+            class="progress-connector"
+            [class.progress-connector--complete]="newGameService.state().step > step.number"
+          ></div>
+        }
+      }
+    </nav>
+  </header>
+  <main class="shell__content">
+    @switch (newGameService.state().step) {
+      @case (1) {
+        <app-create-company></app-create-company>
+      }
+      @case (2) {
+        <app-create-brand></app-create-brand>
+      }
+      @case (3) {
+        <app-create-model></app-create-model>
+      }
+    }
+  </main>
+</div>

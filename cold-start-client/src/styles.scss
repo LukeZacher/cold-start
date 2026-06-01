@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'styles/reset';
+@use 'styles/variables';
+@use 'styles/base';
+@use 'styles/layout';
+@use 'styles/typography';
+@use 'styles/mixins';
+@use 'styles/buttons';
+@use 'styles/cards';
+@use 'styles/forms';
+
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
