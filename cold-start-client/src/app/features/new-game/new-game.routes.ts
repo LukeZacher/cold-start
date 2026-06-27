@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { NewGameShell } from './components/new-game-shell/new-game-shell';
 
 export const newGameRoutes: Routes = [
   {
     path: '',
-    component: NewGameShell,
+    loadComponent: () =>
+      import('./components/new-game-shell/new-game-shell').then((c) => c.NewGameShell),
   },
 ];

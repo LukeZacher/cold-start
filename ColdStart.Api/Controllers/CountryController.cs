@@ -1,5 +1,6 @@
 using ColdStart.Api.Models.Entities;
 using ColdStart.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ColdStart.Api.Controllers;
@@ -16,6 +17,7 @@ public class CountryController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         IEnumerable<Country> countries = await _countryService.GetAllAsync();

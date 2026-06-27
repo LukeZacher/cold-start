@@ -1,0 +1,11 @@
+ng-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+
+  color: inherit; // Inherit color of surrounding text automatically
+
+  --ng-icon-size: 1.25em;
+  --ng-icon-stroke-width: 2px;
+}

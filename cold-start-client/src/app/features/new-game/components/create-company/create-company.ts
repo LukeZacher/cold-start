@@ -1,12 +1,16 @@
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { NewGameService } from '../../services/new-game.service';
 import { CreateCompanyRequest } from '../../../../core/models/company.model';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
 import { CountryService } from '../../../../core/services/country.service';
 import { Country } from '../../../../core/models/country.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { SpinnerService } from '../../../../core/services/spinner.service';
 import { finalize } from 'rxjs';
+import { FormBuilder } from '@angular/forms';
+
+const MIN_COMPANY_NAME_LENGTH: number = 2;
+const MAX_COMPANY_NAME_LENGTH: number = 50;
 
 @Component({
   selector: 'app-create-company',
@@ -19,25 +23,29 @@ export class CreateCompany implements OnInit {
   private readonly countryService = inject(CountryService);
   private readonly toastService = inject(ToastService);
   private readonly spinnerService = inject(SpinnerService);
+  private readonly formBuilder = inject(FormBuilder);
 
-  readonly minCharsCompanyName: number = 2;
-  readonly maxCharsCompanyName: number = 50;
+  readonly minCharsCompanyName: number = MIN_COMPANY_NAME_LENGTH;
+  readonly maxCharsCompanyName: number = MAX_COMPANY_NAME_LENGTH;
 
-  readonly createCompanyForm = new FormGroup({
-    name: new FormControl<string>('', [
-      Validators.required,
-      Validators.minLength(this.minCharsCompanyName),
-      Validators.maxLength(this.maxCharsCompanyName),
-      Validators.pattern(/^[a-zA-Z0-9 ]*$/),
-    ]),
-    countryId: new FormControl<number | null>(null, [Validators.required]),
+  readonly createCompanyForm: FormGroup = this.formBuilder.group({
+    name: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(MIN_COMPANY_NAME_LENGTH),
+        Validators.maxLength(MAX_COMPANY_NAME_LENGTH),
+        Validators.pattern(/^[a-zA-Z0-9 ]*$/),
+      ],
+    ],
+    countryId: [null as number | null, [Validators.required]],
   });
 
-  get nameControl() {
-    return this.createCompanyForm.get('name');
+  get nameControl(): FormControl {
+    return this.createCompanyForm.get('name') as FormControl;
   }
-  get countryControl() {
-    return this.createCompanyForm.get('countryId');
+  get countryControl(): FormControl {
+    return this.createCompanyForm.get('countryId') as FormControl;
   }
 
   readonly countries = signal<Country[]>([]);
@@ -83,14 +91,17 @@ export class CreateCompany implements OnInit {
       userCreated: true,
     };
 
-    this.newGameService.submitCompany(createCompanyRequest).subscribe({
-      next: () => {
-        this.submitting.set(false);
-      },
-      error: () => {
-        this.error.set('Something went wrong when trying to create your company. Please try again');
-        this.submitting.set(false);
-      },
-    });
+    this.newGameService
+      .submitCompany(createCompanyRequest)
+      .pipe(
+        finalize(() => {
+          this.submitting.set(false);
+        }),
+      )
+      .subscribe({
+        error: () => {
+          this.toastService.error("Couldn't create your company. Please try again");
+        },
+      });
   }
 }

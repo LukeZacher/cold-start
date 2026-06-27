@@ -11,7 +11,7 @@ export class Home {
   private readonly router = inject(Router);
 
   startNewGame(): void {
-    this.router.navigate(['/new-game']);
+    this.router.navigate(['/auth/register']);
   }
 
   loadGame(): void {}

@@ -5,11 +5,11 @@ import { Country } from '../models/country.model';
 
 @Injectable({ providedIn: 'root' })
 export class CountryService {
-  private readonly api = inject(ApiService);
+  private readonly apiService = inject(ApiService);
 
   private readonly controllerName: string = 'country';
 
   getAll(): Observable<Country[]> {
-    return this.api.get<Country[]>(`${this.controllerName}`);
+    return this.apiService.get<Country[]>(`${this.controllerName}`);
   }
 }

@@ -29,7 +29,11 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss", "node_modules/ngx-toastr/toastr.css"],
+            "styles": [
+              "node_modules/tippy.js/dist/tippy.css",
+              "node_modules/ngx-toastr/toastr.css",
+              "src/styles.scss"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": ["src"]
             }
