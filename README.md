@@ -1,2 +1,2 @@
 # cold-start
-A web game
+A web game built using Angular and .NET.
