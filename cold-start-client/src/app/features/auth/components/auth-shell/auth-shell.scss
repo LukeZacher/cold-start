@@ -1,0 +1,29 @@
+@use 'styles/mixins' as *;
+
+$auth-header-height: var(--space-16);
+
+.shell {
+  min-height: 100vh;
+  position: relative;
+
+  &__header {
+    position: absolute;
+    top: 0;
+    height: $auth-header-height;
+    width: 100%;
+    background-color: var(--color-primary-dark);
+    @include flex-center;
+  }
+
+  &__logo {
+    color: var(--color-text-primary);
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  &__content {
+    @include flex-center;
+    min-height: 100vh;
+    padding-top: $auth-header-height;
+  }
+}

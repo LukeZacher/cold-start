@@ -52,7 +52,6 @@ export class CreateCompany implements OnInit {
 
   readonly submitting = signal<boolean>(false);
   readonly loadingCountries = signal<boolean>(false);
-  readonly error = signal<string | null>(null);
 
   constructor() {
     effect(() => {
@@ -83,11 +82,10 @@ export class CreateCompany implements OnInit {
     if (this.createCompanyForm.invalid) return;
 
     this.submitting.set(true);
-    this.error.set(null);
 
     const createCompanyRequest: CreateCompanyRequest = {
-      name: this.createCompanyForm.value.name!,
-      countryId: this.createCompanyForm.value.countryId!,
+      name: this.nameControl.value.trim(),
+      countryId: this.countryControl.value,
       userCreated: true,
     };
 
@@ -100,7 +98,7 @@ export class CreateCompany implements OnInit {
       )
       .subscribe({
         error: () => {
-          this.toastService.error("Couldn't create your company. Please try again");
+          this.toastService.error("Couldn't create your company. Please try again.");
         },
       });
   }

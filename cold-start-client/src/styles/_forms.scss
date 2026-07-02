@@ -1,3 +1,5 @@
+@use 'styles/mixins' as *;
+
 .step-form {
   max-width: 480px;
 
@@ -44,6 +46,7 @@
     padding: var(--space-3) var(--space-4);
     color: var(--color-bg-surface);
     transition: border-color var(--transition-fast);
+    width: 100%;
 
     &:focus {
       outline: none;
@@ -54,11 +57,35 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    &--password {
+      padding-right: var(--space-12);
+    }
+  }
+
+  &__password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .toggle-visibility {
+      position: absolute;
+      right: var(--space-4);
+      border: none;
+      background: none;
+      cursor: pointer;
+      @include flex-center;
+      padding: 0;
+
+      ng-icon {
+        --ng-icon__size: 1.3em;
+      }
+    }
   }
 
   &__error {
     font-size: var(--text-sm);
     color: var(--color-danger);
-    min-height: 1.5rem;
+    min-height: var(--space-6);
   }
 }

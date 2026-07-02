@@ -1,80 +1,88 @@
-<main class="register">
-  <div class="register__card">
-    <h1 class="register__heading">Register</h1>
-    <form class="register__form form-column" [formGroup]="registerForm" (ngSubmit)="register()">
-      <div class="field">
-        <label class="field__label" for="email">Email</label>
-        <input
-          class="field__input"
-          formControlName="email"
-          type="email"
-          id="email"
-          [maxLength]="maxEmailLength"
-        />
-        <p class="field__error">
-          @if (emailControl.invalid && emailControl.touched) {
-            @if (emailControl.errors?.['required']) {
-              Email is required.
-            } @else if (emailControl.errors?.['email']) {
-              Must be a valid email address format.
-            } @else if (emailControl.errors?.['maxlength']) {
-              Email cannot be more than {{ maxEmailLength }} characters long.
-            }
+<div class="register">
+  <h1 class="register__heading">Register</h1>
+  <form class="register__form form-column" [formGroup]="registerForm" (ngSubmit)="register()">
+    <!-- Email field -->
+    <div class="field">
+      <label class="field__label" for="email">Email</label>
+      <input
+        class="field__input"
+        formControlName="email"
+        type="email"
+        id="email"
+        [maxLength]="maxEmailLength"
+      />
+      <p class="field__error">
+        @if (emailControl.invalid && emailControl.touched) {
+          @if (emailControl.errors?.['required']) {
+            Email is required.
+          } @else if (emailControl.errors?.['email']) {
+            Must be a valid email address format.
+          } @else if (emailControl.errors?.['maxlength']) {
+            Email cannot be more than {{ maxEmailLength }} characters long.
           }
-        </p>
-      </div>
-      <div class="field">
-        <label class="field__label field__label--icon" for="password"
-          >Password<ng-icon
-            name="info"
-            tp="Password must be at least 8 characters long and no more than 64 characters"
-          ></ng-icon
-        ></label>
+        }
+      </p>
+    </div>
+    <!-- Password field -->
+    <div class="field">
+      <label class="field__label field__label--icon" for="password"
+        >Password<ng-icon
+          name="info"
+          tp="Password must be at least 8 characters long and no more than 64 characters"
+        ></ng-icon
+      ></label>
+      <div class="field__password-input-wrapper">
         <input
-          class="field__input"
+          class="field__input field__input--password"
           formControlName="password"
-          type="password"
+          [type]="showPassword() ? 'text' : 'password'"
           id="password"
           [maxlength]="maxPasswordLength"
         />
-        <p class="field__error">
-          @if (passwordControl.invalid && passwordControl.touched) {
-            @if (passwordControl.errors?.['required']) {
-              Password is required.
-            } @else if (passwordControl.errors?.['minlength']) {
-              Password must be at least {{ minPasswordLength }} characters long.
-            } @else if (passwordControl.errors?.['maxlength']) {
-              Password cannot be more than {{ maxPasswordLength }} characters long.
-            }
-          }
-        </p>
-      </div>
-      <div class="field mb-2">
-        <label class="field__label field__label--icon" for="confirmPassword"
-          >Confirm Password</label
+        <button
+          class="toggle-visibility"
+          type="button"
+          (click)="showPassword.set(!showPassword())"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
         >
-        <input
-          class="field__input"
-          formControlName="confirmPassword"
-          type="password"
-          id="confirmPassword"
-        />
-        <p class="field__error">
-          @if (confirmPasswordControl.touched) {
-            @if (confirmPasswordControl.errors?.['required'] && confirmPasswordControl.invalid) {
-              Confirm password is required.
-            } @else if (registerForm.errors?.['passwordMismatch']) {
-              Passwords must match.
-            }
-          }
-        </p>
+          <ng-icon [name]="showPassword() ? 'eyeOff' : 'eye'"></ng-icon>
+        </button>
       </div>
-      <button class="btn btn--primary" type="submit" [disabled]="registerForm.invalid">
-        Create Account
-      </button>
-    </form>
-    <p class="register__login-link">
-      Already have an account? <a routerLink="/auth/login">Login</a>
-    </p>
-  </div>
-</main>
+      <p class="field__error">
+        @if (passwordControl.invalid && passwordControl.touched) {
+          @if (passwordControl.errors?.['required']) {
+            Password is required.
+          } @else if (passwordControl.errors?.['minlength']) {
+            Password must be at least {{ minPasswordLength }} characters long.
+          } @else if (passwordControl.errors?.['maxlength']) {
+            Password cannot be more than {{ maxPasswordLength }} characters long.
+          }
+        }
+      </p>
+    </div>
+    <!-- Confirm password field -->
+    <div class="field mb-2">
+      <label class="field__label field__label--icon" for="confirmPassword">Confirm Password</label>
+      <input
+        class="field__input"
+        formControlName="confirmPassword"
+        type="password"
+        id="confirmPassword"
+      />
+      <p class="field__error">
+        @if (confirmPasswordControl.touched) {
+          @if (confirmPasswordControl.errors?.['required'] && confirmPasswordControl.invalid) {
+            Confirm password is required.
+          } @else if (registerForm.errors?.['passwordMismatch']) {
+            Passwords must match.
+          }
+        }
+      </p>
+    </div>
+
+    <button class="btn btn--primary" type="submit" [disabled]="registerForm.invalid">
+      Create Account
+    </button>
+  </form>
+  <p class="register__login-link">Already have an account? <a routerLink="/auth/login">Login</a></p>
+</div>

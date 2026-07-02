@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import {
   FormBuilder,
   FormControl,
@@ -14,6 +14,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { SpinnerService } from '../../../../core/services/spinner.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterRequest } from '../../../../core/models/auth.model';
+import { finalize } from 'rxjs';
 
 const MIN_PASSWORD_LENGTH: number = 8;
 const MAX_PASSWORD_LENGTH: number = 64;
@@ -36,10 +37,14 @@ export class Register {
   private readonly toastService = inject(ToastService);
   private readonly spinnerService = inject(SpinnerService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   readonly minPasswordLength: number = MIN_PASSWORD_LENGTH;
   readonly maxPasswordLength: number = MAX_PASSWORD_LENGTH;
   readonly maxEmailLength: number = MAX_EMAIL_LENGTH;
+
+  readonly showPassword = signal<boolean>(false);
+  readonly showConfirmPassword = signal<boolean>(false);
 
   readonly submitting = signal<boolean>(false);
 
@@ -72,8 +77,31 @@ export class Register {
   }
 
   register() {
+    if (this.registerForm.invalid) return;
+
     this.submitting.set(true);
-    // const registerRequest: RegisterRequest =;
-    // this.authService.register(registerRequest).subscribe()
+
+    const registerRequest: RegisterRequest = {
+      email: this.emailControl.value.trim(),
+      password: this.passwordControl.value.trim(),
+    };
+
+    this.authService
+      .register(registerRequest)
+      .pipe(
+        finalize(() => {
+          this.submitting.set(false);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/auth/registration-success'], {
+            state: { email: registerRequest.email },
+          });
+        },
+        error: () => {
+          this.toastService.error('Registration error, please try again.');
+        },
+      });
   }
 }

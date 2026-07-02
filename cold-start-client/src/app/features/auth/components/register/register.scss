@@ -1,15 +1,10 @@
 @use 'styles/mixins' as *;
 
 .register {
-  @include flex-center;
-  min-height: 100vh;
-
-  &__card {
-    @include card;
-    padding-inline: var(--space-8);
-    padding-bottom: var(--space-4);
-    width: 420px;
-  }
+  @include card;
+  padding-inline: var(--space-8);
+  padding-bottom: var(--space-4);
+  width: 420px;
 
   &__heading {
     text-align: center;
