@@ -21,13 +21,16 @@ public class EmailService : IEmailService
             From = $"{_configuration["Resend:FromName"]} <{_configuration["Resend:FromEmail"]}>",
             To = { toEmail },
             Subject = "Confirm your account - coldstart.fun",
-            HtmlBody =
-                $@"
-                <h2>Welcome to Cold Start!</h2>
-                <p>Thanks for signing up. Please confirm your email address by clicking the link below.</p>
-                <a href='{confirmationLink}'>Confirm Email</a>
-                <p>If you didn't create an account at coldstart.fun, you can safely ignore this email.</p>
-            ",
+            Template = new EmailMessageTemplate
+            {
+                TemplateId = Guid.Parse(
+                    _configuration["Resend:RegistrationConfirmationTemplateId"]!
+                ),
+                Variables = new Dictionary<string, object>
+                {
+                    { "CONFIRMATION_LINK", confirmationLink },
+                },
+            },
         };
 
         await _resend.EmailSendAsync(message);

@@ -10,6 +10,7 @@
         type="email"
         id="email"
         [maxLength]="maxEmailLength"
+        autocomplete="email"
       />
       <p class="field__error">
         @if (emailControl.invalid && emailControl.touched) {
@@ -28,7 +29,9 @@
       <label class="field__label field__label--icon" for="password"
         >Password<ng-icon
           name="info"
-          tp="Password must be at least 8 characters long and no more than 64 characters"
+          tp="Password must be at least 8 characters long and no more than {{
+            maxPasswordLength
+          }} characters"
         ></ng-icon
       ></label>
       <div class="field__password-input-wrapper">
@@ -38,12 +41,14 @@
           [type]="showPassword() ? 'text' : 'password'"
           id="password"
           [maxlength]="maxPasswordLength"
+          autocomplete="new-password"
         />
         <button
           class="toggle-visibility"
           type="button"
           (click)="showPassword.set(!showPassword())"
           [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          tabindex="-1"
         >
           <ng-icon [name]="showPassword() ? 'eyeOff' : 'eye'"></ng-icon>
         </button>
@@ -62,13 +67,28 @@
     </div>
     <!-- Confirm password field -->
     <div class="field mb-2">
-      <label class="field__label field__label--icon" for="confirmPassword">Confirm Password</label>
-      <input
-        class="field__input"
-        formControlName="confirmPassword"
-        type="password"
-        id="confirmPassword"
-      />
+      <label class="field__label" for="confirmPassword">Confirm Password</label>
+      <div class="field__password-input-wrapper">
+        <input
+          class="field__input field__input--password"
+          formControlName="confirmPassword"
+          [type]="showConfirmPassword() ? 'text' : 'password'"
+          id="confirmPassword"
+          [maxlength]="maxPasswordLength"
+          autocomplete="new-password"
+        />
+        <button
+          class="toggle-visibility"
+          type="button"
+          (click)="showConfirmPassword.set(!showConfirmPassword())"
+          [attr.aria-label]="
+            showConfirmPassword() ? 'Hide confirm password' : 'Show confirm password'
+          "
+          tabindex="-1"
+        >
+          <ng-icon [name]="showConfirmPassword() ? 'eyeOff' : 'eye'"></ng-icon>
+        </button>
+      </div>
       <p class="field__error">
         @if (confirmPasswordControl.touched) {
           @if (confirmPasswordControl.errors?.['required'] && confirmPasswordControl.invalid) {

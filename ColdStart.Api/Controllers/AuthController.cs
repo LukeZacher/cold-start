@@ -19,16 +19,19 @@ public class AuthController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
+    private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         UserManager<User> userManager,
         IConfiguration configuration,
-        IEmailService emailService
+        IEmailService emailService,
+        ILogger<AuthController> logger
     )
     {
         _userManager = userManager;
         _configuration = configuration;
         _emailService = emailService;
+        _logger = logger;
     }
 
     [HttpPost("register")]
@@ -50,7 +53,19 @@ public class AuthController : ControllerBase
         string confirmationLink =
             $"{_configuration["ClientUrl"]}/auth/confirm-email?token={Uri.EscapeDataString(confirmationToken)}&email={Uri.EscapeDataString(user.Email!)}";
 
-        await _emailService.SendConfirmationEmailAsync(user.Email!, confirmationLink);
+        try
+        {
+            await _emailService.SendConfirmationEmailAsync(user.Email!, confirmationLink);
+        }
+        catch (Exception ex)
+        {
+            await _userManager.DeleteAsync(user);
+            _logger.LogError(ex, "Failed to send confirmation email to {Email}", user.Email);
+            return StatusCode(
+                500,
+                "Registration succeeded but we couldn't send the confirmation email. Please contact support at support@coldstart.fun"
+            );
+        }
 
         return Ok("Registration successful. Please check your email to confirm your account.");
     }

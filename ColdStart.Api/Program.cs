@@ -6,6 +6,7 @@ using ColdStart.Api.Repositories.Interfaces;
 using ColdStart.Api.Services;
 using ColdStart.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -44,13 +45,15 @@ builder
     {
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
+        options.Password.RequireDigit = false;
         options.Password.RequiredLength = 8;
         options.User.RequireUniqueEmail = true;
         options.Lockout.MaxFailedAccessAttempts = 10;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
         options.SignIn.RequireConfirmedEmail = true;
     })
-    .AddEntityFrameworkStores<AppDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 builder
     .Services.AddAuthentication(options =>
@@ -91,6 +94,40 @@ builder.Services.AddScoped<IModelRepository, ModelRepository>();
 builder.Services.AddScoped<IModelService, ModelService>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        IExceptionHandlerFeature? exceptionFeature =
+            context.Features.Get<IExceptionHandlerFeature>();
+        ILogger logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        if (exceptionFeature?.Error != null)
+        {
+            logger.LogError(
+                exceptionFeature.Error,
+                "Unhandled exception: {Message}",
+                exceptionFeature.Error.Message
+            );
+
+            await context.Response.WriteAsJsonAsync(
+                app.Environment.IsDevelopment()
+                    ? new { message = exceptionFeature.Error.Message }
+                    : new { message = "An unexpected error occurred. Please try again later." }
+            );
+        }
+        else
+        {
+            await context.Response.WriteAsJsonAsync(
+                new { message = "An unexpected error occurred. Please try again later." }
+            );
+        }
+    });
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
