@@ -1,11 +1,8 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { NewGameService } from '../../services/new-game.service';
-import { CreateCompanyRequest } from '../../../../core/models/company.model';
+import { CreateCompanyRequest, Country } from '../../../../core/models';
 import { ReactiveFormsModule, FormGroup, Validators, FormControl } from '@angular/forms';
-import { CountryService } from '../../../../core/services/country.service';
-import { Country } from '../../../../core/models/country.model';
-import { ToastService } from '../../../../core/services/toast.service';
-import { SpinnerService } from '../../../../core/services/spinner.service';
+import { CountryService, ToastService } from '../../../../core/services';
 import { finalize } from 'rxjs';
 import { FormBuilder } from '@angular/forms';
 
@@ -19,11 +16,10 @@ const MAX_COMPANY_NAME_LENGTH: number = 50;
   styleUrl: './create-company.scss',
 })
 export class CreateCompany implements OnInit {
-  private readonly newGameService = inject(NewGameService);
-  private readonly countryService = inject(CountryService);
-  private readonly toastService = inject(ToastService);
-  private readonly spinnerService = inject(SpinnerService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly newGameService: NewGameService = inject(NewGameService);
+  private readonly countryService: CountryService = inject(CountryService);
+  private readonly toastService: ToastService = inject(ToastService);
+  private readonly formBuilder: FormBuilder = inject(FormBuilder);
 
   readonly minCharsCompanyName: number = MIN_COMPANY_NAME_LENGTH;
   readonly maxCharsCompanyName: number = MAX_COMPANY_NAME_LENGTH;
@@ -48,20 +44,10 @@ export class CreateCompany implements OnInit {
     return this.createCompanyForm.get('countryId') as FormControl;
   }
 
-  readonly countries = signal<Country[]>([]);
+  readonly countries: WritableSignal<Country[]> = signal<Country[]>([]);
 
-  readonly submitting = signal<boolean>(false);
-  readonly loadingCountries = signal<boolean>(false);
-
-  constructor() {
-    effect(() => {
-      if (this.loadingCountries() || this.submitting()) {
-        this.spinnerService.show();
-      } else {
-        this.spinnerService.hide();
-      }
-    });
-  }
+  readonly submitting: WritableSignal<boolean> = signal<boolean>(false);
+  readonly loadingCountries: WritableSignal<boolean> = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadingCountries.set(true);
@@ -79,6 +65,10 @@ export class CreateCompany implements OnInit {
   }
 
   submit(): void {
+    if (this.submitting()) {
+      return;
+    }
+
     if (this.createCompanyForm.invalid) return;
 
     this.submitting.set(true);

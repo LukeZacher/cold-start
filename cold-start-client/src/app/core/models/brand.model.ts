@@ -1,4 +1,4 @@
-import { BrandType } from './enums/brand.enums';
+import { BrandType } from './enums/brand.enum';
 
 export interface Brand {
   id: number;

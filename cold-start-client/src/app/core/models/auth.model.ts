@@ -12,3 +12,7 @@ export interface AuthResponse {
   token: string;
   email: string;
 }
+
+export interface ResendEmailConfirmationRequest {
+  email: string;
+}

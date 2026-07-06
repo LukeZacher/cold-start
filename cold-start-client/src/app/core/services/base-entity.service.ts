@@ -3,7 +3,7 @@ import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
 
 export abstract class BaseEntityService<T> {
-  protected readonly apiService = inject(ApiService);
+  protected readonly apiService: ApiService = inject(ApiService);
   protected abstract readonly controllerName: string;
 
   getAll(): Observable<T[]> {

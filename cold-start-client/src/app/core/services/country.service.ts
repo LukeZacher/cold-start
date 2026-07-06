@@ -5,7 +5,7 @@ import { Country } from '../models/country.model';
 
 @Injectable({ providedIn: 'root' })
 export class CountryService {
-  private readonly apiService = inject(ApiService);
+  private readonly apiService: ApiService = inject(ApiService);
 
   private readonly controllerName: string = 'country';
 

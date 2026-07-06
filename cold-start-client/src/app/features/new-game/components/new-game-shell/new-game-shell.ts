@@ -11,7 +11,7 @@ import { CreateModel } from '../../../../shared/components/create-model/create-m
   styleUrl: './new-game-shell.scss',
 })
 export class NewGameShell {
-  readonly newGameService = inject(NewGameService);
+  readonly newGameService: NewGameService = inject(NewGameService);
 
   readonly steps = [
     { number: 1, label: 'Company' },

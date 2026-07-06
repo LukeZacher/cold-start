@@ -1,5 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { APP_NAME } from '../../../../core/constants';
 
 @Component({
   selector: 'app-home',
@@ -8,7 +10,12 @@ import { Router } from '@angular/router';
   styleUrl: './home.scss',
 })
 export class Home {
-  private readonly router = inject(Router);
+  private readonly router: Router = inject(Router);
+  private readonly titleService: Title = inject(Title);
+
+  constructor() {
+    this.titleService.setTitle(APP_NAME);
+  }
 
   startNewGame(): void {
     this.router.navigate(['/auth/register']);

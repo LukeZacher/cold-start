@@ -1,21 +1,31 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { ApiService } from './api.service';
 import { Router } from '@angular/router';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.model';
+import {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  ResendEmailConfirmationRequest,
+} from '../models';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiService = inject(ApiService);
-  private readonly router = inject(Router);
+  private readonly apiService: ApiService = inject(ApiService);
+  private readonly router: Router = inject(Router);
 
   private readonly controllerName: string = 'auth';
 
-  readonly isLoggedIn = signal<boolean>(this.hasToken());
-  readonly currentUserEmail = signal<string | null>(this.getStoredEmail());
+  readonly isLoggedIn: WritableSignal<boolean> = signal<boolean>(this.hasToken());
+  readonly currentUserEmail: WritableSignal<string | null> = signal<string | null>(
+    this.getStoredEmail(),
+  );
 
-  register(registerRequest: RegisterRequest): Observable<string> {
-    return this.apiService.post<string>(this.controllerName + '/register', registerRequest);
+  register(registerRequest: RegisterRequest): Observable<{ message: string }> {
+    return this.apiService.post<{ message: string }>(
+      this.controllerName + '/register',
+      registerRequest,
+    );
   }
 
   login(loginRequest: LoginRequest): Observable<AuthResponse> {
@@ -23,7 +33,16 @@ export class AuthService {
   }
 
   confirmEmail(token: string, email: string): Observable<string> {
-    return this.apiService.get<string>(`${this.controllerName}/confirm-email`, { token, email });
+    return this.apiService.get<string>(this.controllerName + '/confirm-email', { token, email });
+  }
+
+  resendEmailConfirmation(
+    resendEmailConfirmationRequest: ResendEmailConfirmationRequest,
+  ): Observable<void> {
+    return this.apiService.post<void>(
+      this.controllerName + '/resend-email-confirmation',
+      resendEmailConfirmationRequest,
+    );
   }
 
   handleLoginSuccess(authResponse: AuthResponse): void {

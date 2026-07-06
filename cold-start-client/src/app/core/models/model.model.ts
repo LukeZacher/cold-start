@@ -1,4 +1,4 @@
-import { BodyStyle, FuelType, SizeSegment } from './enums/vehicle.enums';
+import { BodyStyle, FuelType, SizeSegment } from './enums/vehicle.enum';
 
 export interface Model {
   id: number;

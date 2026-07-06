@@ -12,8 +12,25 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Resend;
+using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-var builder = WebApplication.CreateBuilder(args);
+// Bootstrap logger for startup
+Serilog.Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Code)
+    .CreateBootstrapLogger();
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog(
+    (context, services, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .WriteTo.Console(theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Code);
+    }
+);
 
 // Add services to the container.
 
@@ -54,6 +71,11 @@ builder
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(24);
+});
 
 builder
     .Services.AddAuthentication(options =>
@@ -128,6 +150,8 @@ app.UseExceptionHandler(errorApp =>
         }
     });
 });
+
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

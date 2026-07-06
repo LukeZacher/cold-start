@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
 import { CompanyService } from '../../../core/services/company.service';
 import { BrandService } from '../../../core/services/brand.service';
 import { ModelService } from '../../../core/services/model.service';
@@ -16,12 +16,12 @@ export interface NewGameState {
 
 @Injectable({ providedIn: 'root' })
 export class NewGameService {
-  private readonly companyService = inject(CompanyService);
-  private readonly brandService = inject(BrandService);
-  private readonly modelService = inject(ModelService);
-  private readonly router = inject(Router);
+  private readonly companyService: CompanyService = inject(CompanyService);
+  private readonly brandService: BrandService = inject(BrandService);
+  private readonly modelService: ModelService = inject(ModelService);
+  private readonly router: Router = inject(Router);
 
-  state = signal<NewGameState>({
+  state: WritableSignal<NewGameState> = signal<NewGameState>({
     step: 1,
     companyId: null,
     brandId: null,

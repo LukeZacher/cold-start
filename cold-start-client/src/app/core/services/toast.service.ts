@@ -3,7 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private readonly toastService = inject(ToastrService);
+  private readonly toastService: ToastrService = inject(ToastrService);
 
   success(message: string): void {
     this.toastService.success(message);

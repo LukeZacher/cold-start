@@ -1,1 +1,32 @@
-<p>registration-success works!</p>
+<div class="registration-success">
+  <h1 class="registration-success__heading">Registration Successful</h1>
+  <div class="registration-success__instructions">
+    @if (email) {
+      <p>
+        We sent a confirmation link to <strong>{{ email }}</strong
+        >.
+      </p>
+    } @else {
+      <p>We sent a confirmation link to your email.</p>
+    }
+    <p>Click it to activate your account.</p>
+  </div>
+  <div class="registration-success__resend-container">
+    <p class="registration-success__resend">
+      Didn't receive an email?
+      <button
+        class="btn-link"
+        (click)="resendConfirmationEmail()"
+        [disabled]="isResendButtonDisabled()"
+      >
+        Resend
+      </button>
+    </p>
+    @if (emailSent()) {
+      <p class="registration-success__email-sent">
+        If an unconfirmed account exists for that email, we've emailed a new confirmation link.
+      </p>
+    }
+  </div>
+  <a class="btn btn--primary" routerLink="/auth/login">Login</a>
+</div>

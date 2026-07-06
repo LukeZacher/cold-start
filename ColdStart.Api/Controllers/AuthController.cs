@@ -67,7 +67,12 @@ public class AuthController : ControllerBase
             );
         }
 
-        return Ok("Registration successful. Please check your email to confirm your account.");
+        return Ok(
+            new
+            {
+                message = "Registration successful. Please check your email to confirm your account.",
+            }
+        );
     }
 
     [HttpPost("login")]
@@ -110,7 +115,41 @@ public class AuthController : ControllerBase
             return BadRequest("Invalid or expired confirmation token.");
         }
 
-        return Ok("Email confirmed successfully. You can now log in.");
+        return Ok(new { message = "Email confirmed successfully. You can now log in." });
+    }
+
+    [HttpPost("resend-email-confirmation")]
+    public async Task<IActionResult> ResendEmailConfirmation(
+        [FromBody] ResendEmailConfirmationRequest resendEmailConfirmationRequest
+    )
+    {
+        User? user = await _userManager.FindByEmailAsync(resendEmailConfirmationRequest.Email);
+
+        if (user != null && !user.EmailConfirmed)
+        {
+            IdentityResult newSecurityStamp = await _userManager.UpdateSecurityStampAsync(user);
+            if (!newSecurityStamp.Succeeded)
+            {
+                _logger.LogWarning(
+                    "Failed to update security stamp for {Email} while resending email confirmation mail.",
+                    user.Email
+                );
+            }
+            string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            string confirmationLink =
+                $"{_configuration["ClientUrl"]}/auth/confirm-email?token={Uri.EscapeDataString(confirmationToken)}&email={Uri.EscapeDataString(user.Email!)}";
+
+            try
+            {
+                await _emailService.SendConfirmationEmailAsync(user.Email!, confirmationLink);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to resend confirmation email to {Email}.", user.Email);
+            }
+        }
+
+        return Ok();
     }
 
     private string GenerateToken(User user)

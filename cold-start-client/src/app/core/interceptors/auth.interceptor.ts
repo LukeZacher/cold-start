@@ -6,7 +6,8 @@ export const authInterceptor: HttpInterceptorFn = (
   request: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ) => {
-  const authService = inject(AuthService);
+  const authService: AuthService = inject(AuthService);
+
   const token: string | null = authService.getToken();
 
   if (token) {

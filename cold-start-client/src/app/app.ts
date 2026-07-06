@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, WritableSignal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgxSpinnerModule } from 'ngx-spinner';
 
@@ -9,5 +9,5 @@ import { NgxSpinnerModule } from 'ngx-spinner';
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('cold-start-client');
+  protected readonly title: WritableSignal<string> = signal('cold-start-client');
 }

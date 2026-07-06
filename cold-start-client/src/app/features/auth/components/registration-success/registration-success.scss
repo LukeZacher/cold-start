@@ -1,0 +1,29 @@
+@use 'styles/mixins' as *;
+
+.registration-success {
+  text-align: center;
+
+  &__heading {
+    margin-bottom: var(--space-6);
+  }
+
+  &__instructions {
+    margin-bottom: var(--space-6);
+  }
+
+  &__resend-container {
+    margin-bottom: var(--space-8);
+  }
+
+  &__resend {
+    @include flex-center;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+  }
+
+  &__email-sent {
+    color: var(--color-success);
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
+  }
+}

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import {
   FormBuilder,
@@ -10,11 +10,12 @@ import {
 } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { TippyDirective } from '@ngneat/helipopper';
-import { ToastService } from '../../../../core/services/toast.service';
-import { SpinnerService } from '../../../../core/services/spinner.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { RegisterRequest } from '../../../../core/models/auth.model';
+import { ToastService, AuthService } from '../../../../core/services';
+import { RegistrationFlowService } from '../../services/registration-flow.service';
+import { RegisterRequest } from '../../../../core/models';
 import { finalize } from 'rxjs';
+import { Title } from '@angular/platform-browser';
+import { APP_NAME } from '../../../../core/constants';
 
 const MIN_PASSWORD_LENGTH: number = 8;
 const MAX_PASSWORD_LENGTH: number = 64;
@@ -33,20 +34,22 @@ const passwordMatchValidator: ValidatorFn = (group) => {
   styleUrl: './register.scss',
 })
 export class Register {
-  private readonly authService = inject(AuthService);
-  private readonly toastService = inject(ToastService);
-  private readonly spinnerService = inject(SpinnerService);
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly router = inject(Router);
+  private readonly authService: AuthService = inject(AuthService);
+  private readonly toastService: ToastService = inject(ToastService);
+  private readonly formBuilder: FormBuilder = inject(FormBuilder);
+  private readonly router: Router = inject(Router);
+  private readonly titleService: Title = inject(Title);
+  private readonly registrationFlowService: RegistrationFlowService =
+    inject(RegistrationFlowService);
 
   readonly minPasswordLength: number = MIN_PASSWORD_LENGTH;
   readonly maxPasswordLength: number = MAX_PASSWORD_LENGTH;
   readonly maxEmailLength: number = MAX_EMAIL_LENGTH;
 
-  readonly showPassword = signal<boolean>(false);
-  readonly showConfirmPassword = signal<boolean>(false);
+  readonly showPassword: WritableSignal<boolean> = signal<boolean>(false);
+  readonly showConfirmPassword: WritableSignal<boolean> = signal<boolean>(false);
 
-  readonly submitting = signal<boolean>(false);
+  readonly submitting: WritableSignal<boolean> = signal<boolean>(false);
 
   readonly registerForm: FormGroup = this.formBuilder.group(
     {
@@ -76,7 +79,15 @@ export class Register {
     return this.registerForm.get('confirmPassword') as FormControl;
   }
 
+  constructor() {
+    this.titleService.setTitle(`Register - ${APP_NAME}`);
+  }
+
   register() {
+    if (this.submitting()) {
+      return;
+    }
+
     if (this.registerForm.invalid) return;
 
     this.submitting.set(true);
@@ -95,9 +106,8 @@ export class Register {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/auth/registration-success'], {
-            state: { email: registerRequest.email },
-          });
+          this.registrationFlowService.setRegisteredEmail(registerRequest.email);
+          this.router.navigate(['/auth/registration-success']);
         },
         error: () => {
           this.toastService.error('Registration error, please try again.');

@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { provideSpinnerConfig } from 'ngx-spinner';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { authInterceptor, loadingInterceptor } from './core/interceptors';
 import { provideIcons } from '@ng-icons/core';
 import { appIcons } from './core/icons';
 import {
@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor])),
     provideAnimations(),
     provideToastr(),
     provideSpinnerConfig({ type: 'ball-scale-multiple' }),
