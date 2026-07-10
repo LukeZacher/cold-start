@@ -3,10 +3,12 @@ using System.Security.Claims;
 using System.Text;
 using ColdStart.Api.Models.DTOs.Auth;
 using ColdStart.Api.Models.Entities;
+using ColdStart.Api.Options;
 using ColdStart.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ColdStart.Api.Controllers;
@@ -20,18 +22,21 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly IEmailService _emailService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IOptions<AuthOptions> _authOptions;
 
     public AuthController(
         UserManager<User> userManager,
         IConfiguration configuration,
         IEmailService emailService,
-        ILogger<AuthController> logger
+        ILogger<AuthController> logger,
+        IOptions<AuthOptions> authOptions
     )
     {
         _userManager = userManager;
         _configuration = configuration;
         _emailService = emailService;
         _logger = logger;
+        _authOptions = authOptions;
     }
 
     [HttpPost("register")]
@@ -49,9 +54,7 @@ public class AuthController : ControllerBase
             return BadRequest(identityResult.Errors);
         }
 
-        string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        string confirmationLink =
-            $"{_configuration["ClientUrl"]}/auth/confirm-email?token={Uri.EscapeDataString(confirmationToken)}&email={Uri.EscapeDataString(user.Email!)}";
+        string confirmationLink = await GenerateEmailConfirmationLinkAsync(user);
 
         try
         {
@@ -131,13 +134,12 @@ public class AuthController : ControllerBase
             if (!newSecurityStamp.Succeeded)
             {
                 _logger.LogWarning(
-                    "Failed to update security stamp for {Email} while resending email confirmation mail.",
+                    "Failed to update security stamp for {Email} while resending account confirmation mail.",
                     user.Email
                 );
             }
-            string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            string confirmationLink =
-                $"{_configuration["ClientUrl"]}/auth/confirm-email?token={Uri.EscapeDataString(confirmationToken)}&email={Uri.EscapeDataString(user.Email!)}";
+
+            string confirmationLink = await GenerateEmailConfirmationLinkAsync(user);
 
             try
             {
@@ -145,11 +147,20 @@ public class AuthController : ControllerBase
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to resend confirmation email to {Email}.", user.Email);
+                _logger.LogError(
+                    ex,
+                    "Failed to resend account confirmation mail to {Email}.",
+                    user.Email
+                );
             }
         }
 
-        return Ok();
+        return Ok(
+            new ResendEmailConfirmationResponse
+            {
+                CooldownSeconds = _authOptions.Value.ResendAccountConfirmationMailCooldownSeconds,
+            }
+        );
     }
 
     private string GenerateToken(User user)
@@ -175,5 +186,13 @@ public class AuthController : ControllerBase
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private async Task<string> GenerateEmailConfirmationLinkAsync(User user)
+    {
+        string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        string confirmationLink =
+            $"{_configuration["ClientUrl"]}/auth/confirm-email?token={Uri.EscapeDataString(confirmationToken)}&email={Uri.EscapeDataString(user.Email!)}";
+        return confirmationLink;
     }
 }

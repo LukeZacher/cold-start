@@ -1,6 +1,7 @@
 using System.Text;
 using ColdStart.Api.Data;
 using ColdStart.Api.Models.Entities;
+using ColdStart.Api.Options;
 using ColdStart.Api.Repositories;
 using ColdStart.Api.Repositories.Interfaces;
 using ColdStart.Api.Services;
@@ -57,25 +58,60 @@ builder.Services.AddCors(options =>
     );
 });
 
+IdentityPolicyOptions identityPolicyOptions = builder
+    .Configuration.GetSection("IdentityPolicy")
+    .Get<IdentityPolicyOptions>()!;
+
 builder
     .Services.AddIdentity<User, IdentityRole>(options =>
     {
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
         options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 8;
+        options.Password.RequiredLength = identityPolicyOptions.PasswordRequiredLength;
         options.User.RequireUniqueEmail = true;
-        options.Lockout.MaxFailedAccessAttempts = 10;
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = identityPolicyOptions.MaxFailedAccessAttempts;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
+            identityPolicyOptions.LockoutMinutes
+        );
         options.SignIn.RequireConfirmedEmail = true;
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+// --- Options pattern: DI registration + startup validation for all config-bound options ---
+builder
+    .Services.AddOptions<AuthOptions>()
+    .Bind(builder.Configuration.GetSection("Auth"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder
+    .Services.AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection("Jwt"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder
+    .Services.AddOptions<ResendOptions>()
+    .Bind(builder.Configuration.GetSection("Resend"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder
+    .Services.AddOptions<IdentityPolicyOptions>()
+    .Bind(builder.Configuration.GetSection("IdentityPolicy"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+AuthOptions authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>()!;
+
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
-    options.TokenLifespan = TimeSpan.FromHours(24);
+    options.TokenLifespan = TimeSpan.FromHours(authOptions.TokenLifespanHours);
 });
+
+JwtOptions jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 
 builder
     .Services.AddAuthentication(options =>
@@ -91,18 +127,19 @@ builder
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-            ),
+            ValidIssuer = jwtOptions.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key)),
         };
     });
 
-builder.Services.AddOptions();
+//builder.Services.AddOptions();
+
+ResendOptions resendOptions = builder.Configuration.GetSection("Resend").Get<ResendOptions>()!;
+
 builder.Services.AddResend(options =>
 {
-    options.ApiToken = builder.Configuration["Resend:ApiKey"]!;
+    options.ApiToken = resendOptions.ApiKey;
 });
 
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();

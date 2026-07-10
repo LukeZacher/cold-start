@@ -8,7 +8,7 @@ public class Brand
 
     public string Name { get; set; } = string.Empty;
     public BrandType Type { get; set; }
-    public string? Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public int FoundedYear { get; set; }
     public bool UserCreated { get; set; }
 
